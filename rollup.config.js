@@ -84,5 +84,5 @@ const dtsConfig = defineConfig({
 	],
 });
 
-// eslint-disable-next-line import/no-anonymous-default-export
+// eslint-disable-next-line import-x/no-anonymous-default-export
 export default [config, dtsConfig];

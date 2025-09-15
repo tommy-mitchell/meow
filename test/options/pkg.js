@@ -20,8 +20,6 @@ test('description', t => {
 	`);
 });
 
-test.todo('version');
-
 test('overriding pkg still normalizes', t => {
 	const cli = meow({
 		importMeta,
@@ -37,8 +35,6 @@ test('overriding pkg still normalizes', t => {
 			version: '',
 		},
 	});
-
-	// TODO: test that showVersion logs undefined
 });
 
 test('process title - bin default', verifyPackage, {

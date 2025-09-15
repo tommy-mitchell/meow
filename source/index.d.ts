@@ -291,15 +291,6 @@ export type Options<Flags extends AnyFlags> = {
 	*/
 	readonly booleanDefault?: boolean | undefined;
 
-	// TODO: Remove this in meow 14.
-	/**
-	Whether to use [hard-rejection](https://github.com/sindresorhus/hard-rejection) or not. Disabling this can be useful if you need to handle `process.on('unhandledRejection')` yourself.
-
-	@deprecated This is the default behavior since Node.js 16, so this option is moot.
-	@default true
-	*/
-	readonly hardRejection?: boolean;
-
 	/**
 	Whether to allow unknown flags or not.
 

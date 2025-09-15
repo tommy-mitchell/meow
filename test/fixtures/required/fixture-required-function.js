@@ -24,8 +24,7 @@ const cli = meow({
 		shouldError: {
 			type: 'boolean',
 			isRequired: (flags, _) =>
-				flags.allowError ? 'should error' : false
-			,
+				flags.allowError ? 'should error' : false,
 		},
 	},
 });

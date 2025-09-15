@@ -1,5 +1,5 @@
 import process from 'node:process';
-import {dirname} from 'node:path';
+import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {readPackageUpSync} from 'read-package-up';
 import normalizePackageData from 'normalize-package-data';
@@ -65,11 +65,10 @@ export const buildOptions = (helpText, options) => {
 	}
 
 	const foundPackage = options.pkg ?? readPackageUpSync({
-		cwd: dirname(fileURLToPath(options.importMeta.url)),
+		cwd: path.dirname(fileURLToPath(options.importMeta.url)),
 		normalize: false,
 	})?.packageJson;
 
-	// eslint-disable-next-line unicorn/prevent-abbreviations
 	const pkg = foundPackage ?? {};
 	normalizePackageData(pkg);
 

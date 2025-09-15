@@ -35,36 +35,34 @@ const stackUtils = new StackUtils();
 
 export const stackToErrorMessage = stack => stackUtils.clean(stack).split('\n').at(0);
 
-export const _verifyCli = (baseFixture = defaultFixture) => test.macro(
-	async (t, {fixture = baseFixture, args, execaOptions, expected, error}) => {
-		const assertions = await t.try(async tt => {
-			const arguments_ = args ? args.split(' ') : [];
-			const {all: output, exitCode} = await spawnFixture(fixture, arguments_, {reject: false, all: true, ...execaOptions});
-			tt.log('args:', arguments_);
+export const _verifyCli = (baseFixture = defaultFixture) => test.macro(async (t, {fixture = baseFixture, args, execaOptions, expected, error}) => {
+	const assertions = await t.try(async tt => {
+		const arguments_ = args ? args.split(' ') : [];
+		const {all: output, exitCode} = await spawnFixture(fixture, arguments_, {reject: false, all: true, ...execaOptions});
+		tt.log('args:', arguments_);
 
-			if (error) {
-				tt.log(`error (code ${exitCode}):\n`, output);
+		if (error) {
+			tt.log(`error (code ${exitCode}):\n`, output);
 
-				if (typeof error === 'string') {
-					tt.is(output, error);
-					tt.is(exitCode, 2);
-				} else {
-					const error_ = error.clean ? stackToErrorMessage(output) : output;
-
-					tt.is(error_, error.message);
-					tt.is(exitCode, error.code);
-				}
+			if (typeof error === 'string') {
+				tt.is(output, error);
+				tt.is(exitCode, 2);
 			} else {
-				tt.log('output:\n', output);
+				const error_ = error.clean ? stackToErrorMessage(output) : output;
 
-				if (expected) {
-					tt.is(output, expected);
-				} else {
-					tt.pass();
-				}
+				tt.is(error_, error.message);
+				tt.is(exitCode, error.code);
 			}
-		});
+		} else {
+			tt.log('output:\n', output);
 
-		assertions.commit({retainLogs: !assertions.passed});
-	},
-);
+			if (expected) {
+				tt.is(output, expected);
+			} else {
+				tt.pass();
+			}
+		}
+	});
+
+	assertions.commit({retainLogs: !assertions.passed});
+});

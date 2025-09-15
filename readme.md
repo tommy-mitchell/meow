@@ -213,6 +213,8 @@ Infer the argument type.
 
 By default, the argument `5` in `$ foo 5` becomes a string. Enabling this would infer it as a number.
 
+Also applies to flags without explicit types. By default, `--count 42` remains as the string `'42'`. With `inferType: true`, it becomes the number `42`.
+
 ##### booleanDefault
 
 Type: `boolean | undefined`\
