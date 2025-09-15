@@ -64,6 +64,7 @@ export const buildParserOptions = options => {
 	parserOptions.configuration = {
 		...parserOptions.configuration,
 		'greedy-arrays': false,
+		'parse-numbers': options.inferType,
 	};
 
 	if (parserOptions['--']) {

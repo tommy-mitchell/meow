@@ -123,3 +123,18 @@ test('options - multiple validation errors', verifyFlags, {
 		The option \`choices\` must be an array. Invalid flags: \`--animal\`
 	`,
 });
+
+test('numeric strings are not converted to numbers by default', verifyFlags, {
+	args: '--version 6.0',
+	expected: {
+		version: '6.0',
+	},
+});
+
+test('numeric strings are converted to numbers when inferType is enabled', verifyFlags, {
+	inferType: true,
+	args: '--version 6.0',
+	expected: {
+		version: 6,
+	},
+});
