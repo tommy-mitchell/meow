@@ -101,6 +101,30 @@ const reportMissingRequiredFlags = missingRequiredFlags => {
 	}
 };
 
+export const checkMissingRequiredInput = (options, input) => {
+	const {isRequired} = options.inputOptions;
+
+	if (!isRequired) {
+		return;
+	}
+
+	if (typeof isRequired === 'function') {
+		const result = isRequired(input);
+		if (typeof result !== 'boolean') {
+			throw new TypeError(`Return value for isRequired callback should be of type boolean, but ${typeof result} was returned.`);
+		}
+
+		if (!result) {
+			return;
+		}
+	}
+
+	if (input.length === 0) {
+		console.error('Missing required input');
+		process.exit(2);
+	}
+};
+
 export const checkMissingRequiredFlags = (flags, receivedFlags, input) => {
 	const missingRequiredFlags = [];
 	if (flags === undefined) {

@@ -5,7 +5,12 @@ import {trimNewlines} from 'trim-newlines';
 import redent from 'redent';
 import {buildOptions} from './options.js';
 import {buildParserOptions} from './parser.js';
-import {validate, checkUnknownFlags, checkMissingRequiredFlags} from './validate.js';
+import {
+	validate,
+	checkUnknownFlags,
+	checkMissingRequiredFlags,
+	checkMissingRequiredInput,
+} from './validate.js';
 
 const buildResult = ({pkg: packageJson, ...options}, parserOptions) => {
 	const argv = parseArguments(options.argv, parserOptions);
@@ -73,6 +78,7 @@ const buildResult = ({pkg: packageJson, ...options}, parserOptions) => {
 	}
 
 	checkMissingRequiredFlags(options.flags, flags, input);
+	checkMissingRequiredInput(options, input);
 
 	return {
 		input,

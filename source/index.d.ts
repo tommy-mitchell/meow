@@ -111,6 +111,31 @@ type NumberFlag = Flag<'number', number> | Flag<'number', number[], true>;
 type AnyFlag = StringFlag | BooleanFlag | NumberFlag;
 type AnyFlags = Record<string, AnyFlag>;
 
+export type InputOptionType = 'string' | 'boolean' | 'number' | 'array' | 'string-array' | 'boolean-array' | 'number-array';
+
+export type InputOption = {
+	/**
+	The data type the input arguments should be parsed to.
+	*/
+	readonly type?: InputOptionType;
+
+	/**
+	Determine if at least one non-flag input argument is required.
+
+	If it's only known at runtime whether the input is required or not, you can pass a `Function` instead of a `boolean`, which based on the given input should decide if it's required.
+
+	@default false
+
+	@example
+	```
+	input: {
+		isRequired: true
+	}
+	```
+	*/
+	readonly isRequired?: boolean | ((input: readonly string[]) => boolean);
+};
+
 export type Options<Flags extends AnyFlags> = {
 	/**
 	Pass in [`import.meta`](https://nodejs.org/dist/latest/docs/api/esm.html#esm_import_meta). This is used to find the correct package.json file.
@@ -159,6 +184,24 @@ export type Options<Flags extends AnyFlags> = {
 	```
 	*/
 	readonly flags?: Flags;
+
+	/**
+	Options for non-flag input arguments.
+
+	@example
+	```
+	input: 'number'
+	```
+
+	@example
+	```
+	input: {
+		type: 'number',
+		isRequired: true
+	}
+	```
+	*/
+	readonly input?: InputOption | InputOptionType;
 
 	/**
 	Description to show above the help text. Default: The package.json `"description"` property.

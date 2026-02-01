@@ -95,6 +95,34 @@ Type: `object`
 
 Pass in [`import.meta`](https://nodejs.org/dist/latest/docs/api/esm.html#esm_import_meta). This is used to find the correct package.json file.
 
+##### input
+
+Type: `object | string`
+
+Options for non-flag input arguments.
+
+The value is an object with any of:
+
+- `type`: Type of value. (Possible values: `string` `boolean` `number` `array` `string-array` `boolean-array` `number-array`)
+- `isRequired`: Determine if at least one non-flag input argument is required. (Default: false)
+	- If it's only known at runtime whether the input is required or not, you can pass a `Function` instead of a `boolean`, which based on the given input should decide if the input is required.
+	- The first argument is the **input** string array, which contains the non-flag arguments.
+	- The function should return a `boolean`, true if the input is required, otherwise false.
+
+Example:
+
+```js
+input: 'number'
+```
+
+Example:
+
+```js
+input: {
+	isRequired: true
+}
+```
+
 ##### flags
 
 Type: `object`

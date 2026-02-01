@@ -7,6 +7,8 @@ const required = `${fixtureFolder}/fixture.js`;
 const requiredFunction = `${fixtureFolder}/fixture-required-function.js`;
 const requiredMultiple = `${fixtureFolder}/fixture-required-multiple.js`;
 const conditionalRequiredMultiple = `${fixtureFolder}/fixture-conditional-required-multiple.js`;
+const requiredInput = `${fixtureFolder}/fixture-required-input.js`;
+const requiredInputFunction = `${fixtureFolder}/fixture-required-input-function.js`;
 
 const verifyFlags = _verifyCli(required);
 
@@ -105,4 +107,26 @@ test('isRequired with isMultiple giving no values, but flag is not given', verif
 test('isRequire function that returns false with isMultiple given no values, but flag is not given', verifyFlags, {
 	fixture: conditionalRequiredMultiple,
 	expected: '[]',
+});
+
+test('required input - not specifying input', verifyFlags, {
+	fixture: requiredInput,
+	error: 'Missing required input',
+});
+
+test('required input - specifying input', verifyFlags, {
+	fixture: requiredInput,
+	args: 'foo bar',
+	expected: 'foo,bar',
+});
+
+test('required input with function - not specifying input', verifyFlags, {
+	fixture: requiredInputFunction,
+	error: 'Missing required input',
+});
+
+test('required input with function - specifying input', verifyFlags, {
+	fixture: requiredInputFunction,
+	args: 'foo',
+	expected: 'foo',
 });

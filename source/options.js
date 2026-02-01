@@ -90,6 +90,17 @@ export const buildOptions = (helpText, options) => {
 		pkg,
 	};
 
+	const inputOptions = parsedOptions.input;
+
+	if (inputOptions && typeof inputOptions === 'object' && !Array.isArray(inputOptions)) {
+		const {isRequired, ...inputArgumentOptions} = inputOptions;
+
+		parsedOptions.inputOptions = isRequired === undefined ? {} : {isRequired};
+		parsedOptions.input = Object.keys(inputArgumentOptions).length > 0 ? inputArgumentOptions : 'string';
+	} else {
+		parsedOptions.inputOptions = {};
+	}
+
 	validateOptions(parsedOptions);
 
 	return parsedOptions;

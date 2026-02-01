@@ -29,6 +29,14 @@ test('with input type', verifyTypeInference, {
 	expected: 5,
 });
 
+test('with input type from object', verifyTypeInference, {
+	cli: {
+		argv: ['5'],
+		input: {type: 'number'},
+	},
+	expected: 5,
+});
+
 test('works with flags', verifyTypeInference, {
 	cli: {
 		argv: ['5'],
