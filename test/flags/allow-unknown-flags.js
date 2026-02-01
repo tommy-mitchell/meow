@@ -5,9 +5,11 @@ import {_verifyCli, stripIndentTrim, meowVersion} from '../_utils.js';
 const fixtureFolder = 'allow-unknown-flags';
 
 const allowUnknownFlags = `${fixtureFolder}/fixture.js`;
+const allowUnknownFlagsCamelCase = `${fixtureFolder}/fixture-camelcase.js`;
 const allowUnknownFlagsWithHelp = `${fixtureFolder}/fixture-with-help.js`;
 
 const verifyFlags = _verifyCli(allowUnknownFlags);
+const verifyFlagsCamelCase = _verifyCli(allowUnknownFlagsCamelCase);
 
 test('specifying unknown flags', verifyFlags, {
 	args: '--foo bar --unspecified-a --unspecified-b input-is-allowed',
@@ -60,4 +62,14 @@ test('version with custom config', verifyFlags, {
 	fixture: allowUnknownFlagsWithHelp,
 	args: '-v',
 	expected: meowVersion,
+});
+
+test('accepts camelCase flag with allowUnknownFlags: false', verifyFlagsCamelCase, {
+	args: '--outDir models',
+	expected: 'models',
+});
+
+test('accepts kebab-case flag with allowUnknownFlags: false', verifyFlagsCamelCase, {
+	args: '--out-dir models',
+	expected: 'models',
 });

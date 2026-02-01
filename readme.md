@@ -324,6 +324,9 @@ Default: `true`
 
 Whether to allow unknown flags or not.
 
+> [!NOTE]
+> Flags declared in camelCase accept both `--camelCase` and `--camel-case` (including when `allowUnknownFlags` is `false`).
+
 ##### helpIndent
 
 Type `number`\

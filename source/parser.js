@@ -1,5 +1,30 @@
 import constructParserOptions from 'minimist-options';
+import decamelize from 'decamelize';
 import decamelizeKeys from 'decamelize-keys';
+
+const addCamelCaseAlias = (flagKey, flag) => {
+	if (flagKey === '--') {
+		return;
+	}
+
+	const decamelizedKey = decamelize(flagKey, {separator: '-'});
+	if (decamelizedKey === flagKey) {
+		return;
+	}
+
+	let aliases = [];
+
+	if (flag.alias !== undefined) {
+		aliases = Array.isArray(flag.alias) ? flag.alias : [flag.alias];
+	}
+
+	if (aliases.includes(flagKey)) {
+		return;
+	}
+
+	aliases.push(flagKey);
+	flag.alias = aliases.length === 1 ? aliases[0] : aliases;
+};
 
 const buildParserFlags = ({flags, booleanDefault}) => {
 	const parserFlags = {};
@@ -24,13 +49,17 @@ const buildParserFlags = ({flags, booleanDefault}) => {
 		}
 
 		if (Array.isArray(flag.aliases)) {
+			const aliases = [...flag.aliases];
+
 			if (flag.alias) {
-				flag.aliases.push(flag.alias);
+				aliases.push(flag.alias);
 			}
 
-			flag.alias = flag.aliases;
+			flag.alias = aliases;
 			delete flag.aliases;
 		}
+
+		addCamelCaseAlias(flagKey, flag);
 
 		parserFlags[flagKey] = flag;
 	}
