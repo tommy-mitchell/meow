@@ -70,7 +70,15 @@ export const buildOptions = (helpText, options) => {
 	})?.packageJson;
 
 	const pkg = foundPackage ?? {};
-	normalizePackageData(pkg);
+	let isPackageNormalized = false;
+	const getPackage = () => {
+		if (!isPackageNormalized) {
+			normalizePackageData(pkg);
+			isPackageNormalized = true;
+		}
+
+		return pkg;
+	};
 
 	const parsedOptions = {
 		argv: process.argv.slice(2),
@@ -88,6 +96,7 @@ export const buildOptions = (helpText, options) => {
 		helpIndent: 2,
 		...options,
 		pkg,
+		getPackage,
 	};
 
 	const inputOptions = parsedOptions.input;

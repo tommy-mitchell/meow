@@ -12,7 +12,36 @@ import {
 	checkMissingRequiredInput,
 } from './validate.js';
 
-const buildResult = ({pkg: packageJson, ...options}, parserOptions) => {
+const getUnscopedPackageName = packageName => {
+	if (!packageName.startsWith('@')) {
+		return packageName;
+	}
+
+	const slashIndex = packageName.indexOf('/');
+	return slashIndex === -1 ? packageName : packageName.slice(slashIndex + 1);
+};
+
+const getProcessTitle = packageJson => {
+	if (!packageJson || typeof packageJson !== 'object') {
+		return '';
+	}
+
+	const packageName = typeof packageJson.name === 'string' ? packageJson.name : '';
+	const unscopedPackageName = getUnscopedPackageName(packageName);
+	const {bin} = packageJson;
+
+	if (typeof bin === 'string') {
+		return unscopedPackageName;
+	}
+
+	if (bin && typeof bin === 'object') {
+		return Object.keys(bin).at(0) ?? packageName;
+	}
+
+	return packageName;
+};
+
+const buildResult = ({pkg: packageJson, getPackage, ...options}, parserOptions) => {
 	const argv = parseArguments(options.argv, parserOptions);
 	let help = '';
 
@@ -84,7 +113,9 @@ const buildResult = ({pkg: packageJson, ...options}, parserOptions) => {
 		input,
 		flags,
 		unnormalizedFlags,
-		pkg: packageJson,
+		get pkg() {
+			return getPackage ? getPackage() : packageJson;
+		},
 		help,
 		showHelp,
 		showVersion,
@@ -96,7 +127,7 @@ const meow = (helpText, options = {}) => {
 	const parserOptions = buildParserOptions(parsedOptions);
 	const result = buildResult(parsedOptions, parserOptions);
 
-	process.title = result.pkg.bin ? Object.keys(result.pkg.bin).at(0) : result.pkg.name;
+	process.title = getProcessTitle(parsedOptions.pkg);
 
 	return result;
 };
