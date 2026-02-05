@@ -71,6 +71,7 @@ foo(cli.input.at(0), cli.flags);
 Returns an `object` with:
 
 - `input` *(Array)* - Non-flag arguments
+- `command` *(string | undefined)* - The selected command when using `commands`
 - `flags` *(Object)* - Flags converted to camelCase excluding aliases
 - `unnormalizedFlags` *(Object)* - Flags converted to camelCase including aliases
 - `pkg` *(Object)* - The `package.json` object
@@ -120,6 +121,47 @@ Example:
 ```js
 input: {
 	isRequired: true
+}
+```
+
+##### commands
+
+Type: `string[]`
+
+List of valid commands. Commands must be a single argument without whitespace and must not start with `-`.
+
+When set, parsing stops at the first non-flag argument and treats it as the command. The remaining arguments are returned in `input` so they can be passed to a subcommand parser. An unknown command will show help and exit with code 2. Parent flags must appear before the command.
+
+If no command is given, `cli.command` is `undefined` and meow does not exit — you decide what to do:
+
+```js
+if (!cli.command) {
+	cli.showHelp(); // or showHelp(0), or a custom message, or a default command
+}
+```
+
+Example:
+
+```js
+import meow from 'meow';
+
+const cli = meow({
+	importMeta: import.meta,
+	commands: ['run', 'list'],
+	flags: {
+		verbose: {
+			type: 'boolean',
+			shortFlag: 'v'
+		}
+	}
+});
+
+if (!cli.command) {
+	cli.showHelp(0);
+}
+
+if (cli.command === 'run') {
+	const runCli = meow({importMeta: import.meta, argv: cli.input});
 }
 ```
 
@@ -203,7 +245,7 @@ Default: `true`
 
 Automatically show the help text when the `--help` flag is present. Useful to set this value to `false` when a CLI manages child CLIs with their own help text.
 
-This option is only considered when there is only one argument in `process.argv`.
+This is only triggered when `--help` is the only argument.
 
 ##### autoVersion
 
@@ -212,7 +254,7 @@ Default: `true`
 
 Automatically show the version text when the `--version` flag is present. Useful to set this value to `false` when a CLI manages child CLIs with their own version text.
 
-This option is only considered when there is only one argument in `process.argv`.
+This is only triggered when `--version` is the only argument.
 
 ##### pkg
 
@@ -319,7 +361,7 @@ const cli = meow(`
 
 ##### allowUnknownFlags
 
-Type `boolean`\
+Type: `boolean`\
 Default: `true`
 
 Whether to allow unknown flags or not.
@@ -329,7 +371,7 @@ Whether to allow unknown flags or not.
 
 ##### helpIndent
 
-Type `number`\
+Type: `number`\
 Default: `2`
 
 The number of spaces to use for indenting the help text.

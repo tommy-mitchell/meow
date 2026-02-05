@@ -73,3 +73,23 @@ test('accepts kebab-case flag with allowUnknownFlags: false', verifyFlagsCamelCa
 	args: '--out-dir models',
 	expected: 'models',
 });
+
+test('does not treat arguments after -- as unknown flags', verifyFlags, {
+	args: '-- --unspecified-a',
+	expected: 'undefined',
+});
+
+test('does not treat negative integer input as an unknown flag', verifyFlags, {
+	args: '-1',
+	expected: 'undefined',
+});
+
+test('does not treat negative decimal input as an unknown flag', verifyFlags, {
+	args: '-0.5',
+	expected: 'undefined',
+});
+
+test('does not treat a lone dash input as an unknown flag', verifyFlags, {
+	args: '-',
+	expected: 'undefined',
+});

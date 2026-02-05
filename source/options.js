@@ -5,7 +5,35 @@ import {readPackageUpSync} from 'read-package-up';
 import normalizePackageData from 'normalize-package-data';
 import {decamelizeFlagKey, joinFlagKeys} from './utils.js';
 
+const isObject = value => Object.prototype.toString.call(value) === '[object Object]';
+
 const validateOptions = options => {
+	if (!isObject(options.flags)) {
+		throw new TypeError('The `flags` option must be an object.');
+	}
+
+	if (options.input !== undefined && typeof options.input !== 'string' && !isObject(options.input)) {
+		throw new TypeError('The `input` option must be a string or an object.');
+	}
+
+	if (isObject(options.input) && Object.hasOwn(options.input, 'isRequired') && typeof options.input.isRequired !== 'boolean' && typeof options.input.isRequired !== 'function') {
+		throw new TypeError('The `input.isRequired` option must be a boolean or a function.');
+	}
+
+	if (options.commands !== undefined) {
+		if (!Array.isArray(options.commands)) {
+			throw new TypeError('The `commands` option must be an array of strings.');
+		}
+
+		if (options.commands.length === 0) {
+			throw new TypeError('The `commands` option must contain at least one command.');
+		}
+
+		if (options.commands.some(command => typeof command !== 'string' || command === '' || command.startsWith('-') || /\s/.test(command))) {
+			throw new TypeError('The `commands` option must be an array of non-empty strings without whitespace that do not start with `-`.');
+		}
+	}
+
 	const invalidOptionFilters = {
 		flags: {
 			keyContainsDashes: {
@@ -28,7 +56,7 @@ const validateOptions = options => {
 				},
 			},
 			defaultNotInChoices: {
-				filter: ([, flag]) => flag.default && Array.isArray(flag.choices) && ![flag.default].flat().every(value => flag.choices.includes(value)),
+				filter: ([, flag]) => Object.hasOwn(flag, 'default') && Array.isArray(flag.choices) && ![flag.default].flat().every(value => flag.choices.includes(value)),
 				message: flagKeys => `Each value of the option \`default\` must exist within the option \`choices\`. Invalid flags: ${joinFlagKeys(flagKeys)}`,
 			},
 		},
@@ -82,7 +110,6 @@ export const buildOptions = (helpText, options) => {
 
 	const parsedOptions = {
 		argv: process.argv.slice(2),
-		flags: {},
 		inferType: false,
 		input: 'string',
 		description: pkg.description ?? false,
@@ -92,12 +119,17 @@ export const buildOptions = (helpText, options) => {
 		autoVersion: true,
 		booleanDefault: false,
 		allowUnknownFlags: true,
-		allowParentFlags: true,
 		helpIndent: 2,
 		...options,
 		pkg,
 		getPackage,
 	};
+
+	if (parsedOptions.flags === undefined) {
+		parsedOptions.flags = {};
+	}
+
+	validateOptions(parsedOptions);
 
 	const inputOptions = parsedOptions.input;
 
@@ -109,8 +141,6 @@ export const buildOptions = (helpText, options) => {
 	} else {
 		parsedOptions.inputOptions = {};
 	}
-
-	validateOptions(parsedOptions);
 
 	return parsedOptions;
 };

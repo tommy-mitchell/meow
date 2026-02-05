@@ -36,6 +36,39 @@ test('return object', t => {
 	});
 });
 
+test('flags option can be undefined', t => {
+	const cli = meow({
+		importMeta,
+		flags: undefined,
+	});
+
+	t.deepEqual(cli.flags, {});
+});
+
+test('throws if input option is invalid type', t => {
+	const error = t.throws(() => {
+		meow({
+			importMeta,
+			input: true,
+		});
+	});
+
+	t.is(error.message, 'The `input` option must be a string or an object.');
+});
+
+test('throws if input isRequired option is invalid type', t => {
+	const error = t.throws(() => {
+		meow({
+			importMeta,
+			input: {
+				isRequired: 1,
+			},
+		});
+	});
+
+	t.is(error.message, 'The `input.isRequired` option must be a boolean or a function.');
+});
+
 test('spawn cli and disabled autoVersion and autoHelp', verifyCli, {
 	args: '--version --help',
 	expected: stripIndentTrim`

@@ -41,6 +41,54 @@ const getProcessTitle = packageJson => {
 	return packageName;
 };
 
+const reportCommandError = (message, commands) => {
+	console.error(message);
+	console.error(`Available commands: ${commands.join(', ')}`);
+};
+
+const parseCommand = (input, options, parserOptions, showHelp) => {
+	if (!options.commands) {
+		return {command: undefined, input};
+	}
+
+	if (input.length === 0) {
+		return {command: undefined, input: []};
+	}
+
+	const command = String(input[0]);
+
+	if (!options.commands.includes(command)) {
+		if (!options.allowUnknownFlags && command.startsWith('-')) {
+			// The "command" looks like a flag. Determine whether it genuinely came from
+			// before '--' (an unknown parent flag) or after '--' (a post-separator positional
+			// being used as the command name). Re-parsing the pre-separator slice is the
+			// only reliable way — a simple indexOf would misfire when the same string
+			// appears as a flag value earlier in argv.
+			const separatorIndex = options.argv.indexOf('--');
+			let commandIsAfterSeparator = false;
+
+			if (separatorIndex !== -1) {
+				const preArgv = parseArguments(options.argv.slice(0, separatorIndex), parserOptions);
+				commandIsAfterSeparator = !preArgv._.map(String).includes(command);
+			}
+
+			if (!commandIsAfterSeparator) {
+				// Only check flags before the first non-flag argument (the actual command),
+				// so child flags meant for subcommands are not reported as unknown.
+				const firstNonFlagIndex = input.findIndex(item => typeof item !== 'string' || !item.startsWith('-'));
+				const parentFlags = firstNonFlagIndex === -1 ? input : input.slice(0, firstNonFlagIndex);
+				checkUnknownFlags(parentFlags);
+			}
+		}
+
+		reportCommandError(`Unknown command: ${command}`, options.commands);
+		showHelp();
+		return {command: undefined, input: []};
+	}
+
+	return {command, input: input.slice(1)};
+};
+
 const buildResult = ({pkg: packageJson, getPackage, ...options}, parserOptions) => {
 	const argv = parseArguments(options.argv, parserOptions);
 	let help = '';
@@ -84,11 +132,20 @@ const buildResult = ({pkg: packageJson, getPackage, ...options}, parserOptions) 
 		}
 	}
 
-	const input = argv._;
+	const {command, input} = parseCommand(argv._, options, parserOptions, showHelp);
+
 	delete argv._;
 
-	if (!options.allowUnknownFlags) {
-		checkUnknownFlags(input);
+	if (!options.allowUnknownFlags && !options.commands) {
+		let inputForUnknownFlags = input;
+		const separatorIndex = options.argv.indexOf('--');
+
+		if (separatorIndex !== -1 && !Object.hasOwn(options.flags, '--')) {
+			const argvBeforeSeparator = parseArguments(options.argv.slice(0, separatorIndex), parserOptions);
+			inputForUnknownFlags = argvBeforeSeparator._;
+		}
+
+		checkUnknownFlags(inputForUnknownFlags);
 	}
 
 	const flags = camelCaseKeys(argv, {exclude: ['--', /^\w$/]});
@@ -111,6 +168,7 @@ const buildResult = ({pkg: packageJson, getPackage, ...options}, parserOptions) 
 
 	return {
 		input,
+		command,
 		flags,
 		unnormalizedFlags,
 		get pkg() {

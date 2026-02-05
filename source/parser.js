@@ -96,6 +96,10 @@ export const buildParserOptions = options => {
 		'parse-numbers': options.inferType,
 	};
 
+	if (options.commands) {
+		parserOptions.configuration['halt-at-non-option'] = true;
+	}
+
 	if (parserOptions['--']) {
 		parserOptions.configuration['populate--'] = true;
 	}

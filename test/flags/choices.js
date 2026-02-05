@@ -161,6 +161,21 @@ test('success when each value of default exist within the option choices', verif
 	},
 });
 
+test('success when falsy values are valid defaults within choices', verifyChoices, {
+	flags: {
+		number: {
+			type: 'number',
+			choices: [0, 1],
+			default: 0,
+		},
+		boolean: {
+			type: 'boolean',
+			choices: [false, true],
+			default: false,
+		},
+	},
+});
+
 test('throws when default does not only include valid choices', verifyChoices, {
 	flags: {
 		number: {
@@ -183,5 +198,44 @@ test('throws when default does not only include valid choices', verifyChoices, {
 	error: oneLine`
 		Each value of the option \`default\` must exist within the option \`choices\`.
 		Invalid flags: \`--number\`, \`--string\`, \`--multiString\`
+	`,
+});
+
+test('accepts 0 and false as valid choice values', verifyChoices, {
+	flags: {
+		number: {
+			type: 'number',
+			isRequired: true,
+			choices: [0, 1],
+		},
+		boolean: {
+			type: 'boolean',
+			isRequired: true,
+			choices: [false, true],
+		},
+	},
+	args: '--number=0 --boolean=false',
+	expected: {
+		number: 0,
+		boolean: false,
+	},
+});
+
+test('throws when falsey defaults are not in choices', verifyChoices, {
+	flags: {
+		number: {
+			type: 'number',
+			choices: [1, 2],
+			default: 0,
+		},
+		boolean: {
+			type: 'boolean',
+			choices: [true],
+			default: false,
+		},
+	},
+	error: oneLine`
+		Each value of the option \`default\` must exist within the option \`choices\`.
+		Invalid flags: \`--number\`, \`--boolean\`
 	`,
 });

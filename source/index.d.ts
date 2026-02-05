@@ -170,7 +170,7 @@ export type Options<Flags extends AnyFlags> = {
 			choices: ['rainbow', 'cat', 'unicorn'],
 			default: ['rainbow', 'cat'],
 			shortFlag: 'u',
-			aliases: ['unicorns']
+			aliases: ['unicorns'],
 			isMultiple: true,
 			isRequired: (flags, input) => {
 				if (flags.otherFlag) {
@@ -204,6 +204,39 @@ export type Options<Flags extends AnyFlags> = {
 	readonly input?: InputOption | InputOptionType;
 
 	/**
+	List of valid commands. Commands must be a single argument without whitespace and must not start with `-`.
+
+	When set, parsing stops at the first non-flag argument and treats it as the command. The remaining arguments are returned in `input` so they can be passed to a subcommand parser. An unknown command will show help and exit with code 2. Parent flags must appear before the command.
+
+	If no command is given, `cli.command` is `undefined` and meow does not exit — you decide what to do (show help, run a default, etc.).
+
+	@example
+	```
+	import meow from 'meow';
+
+	const cli = meow({
+		importMeta: import.meta,
+		commands: ['run', 'list'],
+		flags: {
+			verbose: {
+				type: 'boolean',
+				shortFlag: 'v'
+			}
+		}
+	});
+
+	if (!cli.command) {
+		cli.showHelp(0);
+	}
+
+	if (cli.command === 'run') {
+		const runCli = meow({importMeta: import.meta, argv: cli.input});
+	}
+	```
+	*/
+	readonly commands?: readonly string[];
+
+	/**
 	Description to show above the help text. Default: The package.json `"description"` property.
 
 	Set it to `false` to disable it altogether.
@@ -229,14 +262,14 @@ export type Options<Flags extends AnyFlags> = {
 	/**
 	Automatically show the help text when the `--help` flag is present. Useful to set this value to `false` when a CLI manages child CLIs with their own help text.
 
-	This option is only considered when there is only one argument in `process.argv`.
+	This is only triggered when `--help` is the only argument.
 	*/
 	readonly autoHelp?: boolean;
 
 	/**
 	Automatically show the version text when the `--version` flag is present. Useful to set this value to `false` when a CLI manages child CLIs with their own version text.
 
-	This option is only considered when there is only one argument in `process.argv`.
+	This is only triggered when `--version` is the only argument.
 	*/
 	readonly autoVersion?: boolean;
 
@@ -378,6 +411,11 @@ export type Result<Flags extends AnyFlags> = {
 	input: string[];
 
 	/**
+	Command name when using the `commands` option.
+	*/
+	command?: string;
+
+	/**
 	Flags converted to camelCase excluding aliases.
 	*/
 	flags: CamelCasedProperties<TypedFlags<Flags>> & Record<string, unknown>;
@@ -407,7 +445,7 @@ export type Result<Flags extends AnyFlags> = {
 	/**
 	Show the version text and exit.
 	*/
-	showVersion: () => void;
+	showVersion: () => never;
 };
 /**
 @param helpMessage - Shortcut for the `help` option.

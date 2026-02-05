@@ -124,6 +124,16 @@ test('options - multiple validation errors', verifyFlags, {
 	`,
 });
 
+test('throws if flags option is not an object', verifyFlags, {
+	flags: 'invalid',
+	error: 'The `flags` option must be an object.',
+});
+
+test('throws if flags option is null', verifyFlags, {
+	flags: null,
+	error: 'The `flags` option must be an object.',
+});
+
 test('numeric strings are not converted to numbers by default', verifyFlags, {
 	args: '--version 6.0',
 	expected: {

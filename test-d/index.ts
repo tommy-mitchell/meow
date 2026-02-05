@@ -16,6 +16,9 @@ meow({importMeta, input: {type: 'number'}});
 meow({importMeta, input: {type: 'number', isRequired: true}});
 meow({importMeta, input: {isRequired: true}});
 
+// Commands
+expectType<string | undefined>(meow({importMeta, commands: ['run', 'list']}).command);
+
 // Flag types
 expectAssignable<{flags: {foo: number}}>(meow({importMeta, flags: {foo: {type: 'number', isRequired: true}}}));
 expectAssignable<{flags: {foo: string | undefined}}>(meow({importMeta, flags: {foo: {type: 'string'}}}));

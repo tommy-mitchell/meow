@@ -18,7 +18,7 @@ const validateChoicesByFlag = (flagKey, flagValue, receivedInput) => {
 
 	const valueMustBeOneOf = `Value must be one of: [\`${choices.join('`, `')}\`]`;
 
-	if (!receivedInput) {
+	if (receivedInput === undefined) {
 		if (isRequired) {
 			return `Flag \`${decamelizeFlagKey(flagKey)}\` has no value. ${valueMustBeOneOf}`;
 		}
@@ -27,7 +27,7 @@ const validateChoicesByFlag = (flagKey, flagValue, receivedInput) => {
 	}
 
 	if (Array.isArray(receivedInput)) {
-		const unknownValues = receivedInput.filter(index => !choices.includes(index));
+		const unknownValues = receivedInput.filter(value => !choices.includes(value));
 
 		if (unknownValues.length > 0) {
 			const valuesText = unknownValues.length > 1 ? 'values' : 'value';
@@ -52,7 +52,7 @@ const validateChoices = (flags, receivedFlags) => {
 	}
 
 	if (errors.length > 0) {
-		throw new Error(`${errors.join('\n')}`);
+		throw new Error(errors.join('\n'));
 	}
 };
 
@@ -68,8 +68,10 @@ const reportUnknownFlags = unknownFlags => {
 	].join('\n'));
 };
 
+const isNegativeNumberArgument = value => /^-(?:\d+|\d*\.\d+)(?:e[+-]?\d+)?$/i.test(value);
+
 export const checkUnknownFlags = input => {
-	const unknownFlags = input.filter(item => typeof item === 'string' && item.startsWith('-'));
+	const unknownFlags = input.filter(item => typeof item === 'string' && item.length > 1 && item.startsWith('-') && !isNegativeNumberArgument(item));
 	if (unknownFlags.length > 0) {
 		reportUnknownFlags(unknownFlags);
 		process.exit(2);
@@ -127,9 +129,6 @@ export const checkMissingRequiredInput = (options, input) => {
 
 export const checkMissingRequiredFlags = (flags, receivedFlags, input) => {
 	const missingRequiredFlags = [];
-	if (flags === undefined) {
-		return [];
-	}
 
 	for (const flagName of Object.keys(flags)) {
 		if (flags[flagName].isRequired && isFlagMissing(flagName, flags, receivedFlags, input)) {
