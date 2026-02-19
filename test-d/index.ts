@@ -1,8 +1,6 @@
 import {expectAssignable, expectError, expectType} from 'tsd';
 import type {PackageJson} from 'type-fest';
-import meow from '../source/index.js';
-
-type AnyFlag = NonNullable<NonNullable<Parameters<typeof meow>[0]>['flags']>[string];
+import meow, {type AnyFlag, type AnyFlags} from '../source/index.js';
 
 const importMeta = import.meta;
 
@@ -71,3 +69,11 @@ expectAssignable<AnyFlag>({choices: ['cat']});
 expectError<AnyFlag>({type: 'string', choices: 'cat'});
 expectError<AnyFlag>({type: 'string', choices: [1]});
 expectError<AnyFlag>({choices: ['cat', 1, true]});
+
+// Defining flags separately with `satisfies`
+const separateFlags = {
+	unicorn: {type: 'string', shortFlag: 'u'},
+	verbose: {type: 'boolean'},
+} satisfies AnyFlags;
+
+expectAssignable<{flags: {unicorn: string | undefined; verbose: boolean | undefined}}>(meow({importMeta, flags: separateFlags}));

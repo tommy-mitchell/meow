@@ -108,8 +108,8 @@ export type Flag<PrimitiveType extends FlagType, Type, IsMultiple = false> = {
 type StringFlag = Flag<'string', string> | Flag<'string', string[], true>;
 type BooleanFlag = Flag<'boolean', boolean> | Flag<'boolean', boolean[], true>;
 type NumberFlag = Flag<'number', number> | Flag<'number', number[], true>;
-type AnyFlag = StringFlag | BooleanFlag | NumberFlag;
-type AnyFlags = Record<string, AnyFlag>;
+export type AnyFlag = StringFlag | BooleanFlag | NumberFlag;
+export type AnyFlags = Record<string, AnyFlag>;
 
 export type InputOptionType = 'string' | 'boolean' | 'number' | 'array' | 'string-array' | 'boolean-array' | 'number-array';
 
